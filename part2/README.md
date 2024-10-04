@@ -1,0 +1,1 @@
+TODO: Instructions for part 2: Deploy in AKS utilizing KEDA
