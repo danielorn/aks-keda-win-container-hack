@@ -35,7 +35,7 @@ During this lab we will build an image from an existing .NET application and the
 
 ### Images and Layers
 
-Container images use a layered filesystem, where each layer represents a set of file changes or additions. These layers are stacked on top of each other to form the final image.
+Container images use a layered filesystem, where each layer represents a set of file changes or additions. These layers are stacked on top of each other to form the final image. Below are some common terminology related to image layers:
 
 - **Base Layer:** The bottom layer is typically a base image, for example a base system for building or running .NET applications.
 
@@ -69,9 +69,9 @@ The application code itself will not be modified as part of the containerization
 
 ### Create the dockerfile
 
-A Dockerfile for building the application and creating the final image can be found
+A [Dockerfile](src/Dockerfile) for building the application and creating the final image can be found in the [src/](src/) directory
 
-This Dockerfile sets up a multistage build where the application is built in the first stage and the runtime environment is prepared in the second stage. The final image contains only the necessary runtime dependencies and the built application, which helps to keep the image size small and the build process efficient. Below is a detailed summary of the provided Dockerfile
+This Dockerfile sets up a multistage build where the application is built in the first stage and the runtime environment is prepared in the second stage. Take some time to familiarize yourself with the Dockerfile content. Below is a detailed summary of the provided Dockerfile
 
 #### Escape Directive
 
@@ -106,7 +106,7 @@ By executing the below command in the same folder as the `Dockerfile` a new imag
 docker build -t eventproxy:1.0 .
 ```
 
-### Explore the resulting image
+### Explore the final image
 
 Once the final image is created this image can be used in the `docker run` command to create a container based on the image.
 
@@ -117,8 +117,8 @@ The [`-t` flag](https://docs.docker.com/reference/cli/docker/container/run/#tty)
 Combining the `i` and `t` flag and starting a shell in the container using `cmd` allows you to browse the filesystem inside the container as well as launch processes inside it. This is sometimes refered to as the "ssh" of containers.
 
 Take some time to explore the container
-- What files are inside
-- What processes are running
+- What does the filesystem look like (what files are present)?
+- What processes are running?
 
 ```shell
 docker run -it eventproxy:1.0 cmd
@@ -126,8 +126,7 @@ docker run -it eventproxy:1.0 cmd
 
 ## Run the containerized application locally
 
-TODO: SUMMARY
-
+The final image contains all the runtime dependencies for the application, thus it can be launched on any system capable of running windows containers. In the section the container will be launched (with configuration injected) and the application inside will receive and send messages on queues in an Azure Servicebus namespace  
 
 ### Create Azure Service Bus queues
 
@@ -154,20 +153,24 @@ If the container is started without a command supplied to docker run, it will de
 However the application requires some configuration to run. It needs to know what queue to listen on and credentials to access the servicebus to send and receive messages. The application expects this configuration to be available in environment variables. Environment variables can be set in the container by passing them to docker run using the `-e` flag
 
 ```shell
-docker run -e ConnectionStrings__ServiceBus=[ConnectionString] -e QueueSettings__QueueName=[prefix]-proxy eventproxy:1.0
+docker run -e ConnectionStrings__ServiceBus="[ConnectionString]" -e QueueSettings__QueueName="[prefix]-proxy" eventproxy:1.0
 ```
 
 Once the application has started you should see the following logs outputted
+
 ```
 Starting BillingBatchEventProxy listen on queue [[prefix]-proxy]
-``` 
+```
 
-Use ServiceBusExplorer and add a message to the `[prefix]-proxy` queue
+Use ServiceBusExplorer and add a message to the `[prefix]-proxy` queue using either the [portal](https://learn.microsoft.com/en-us/azure/service-bus-messaging/explorer#send-a-message-to-a-queue-or-topic) or the [open source client](https://github.com/paolosalvatori/ServiceBusExplorer)
+
 - An example message body can be found in [example-message.json](../example-message.json)
 - Set the `replyTo` header to `[prefix]-reply`
 
-Monitor the log output. View the `[prefix]-reply` queue for processed messages.
+Monitor the log output and check the `[prefix]-reply` queue for processed messages.
 
 <mark>PLEASE NOTE: The application will process one message from the queue and then exit. If you want to process multiple messages you need to launch one container per message.</mark>
 
 ## Debug the containerized application
+
+// TODO

@@ -62,7 +62,7 @@ namespace Billing.Batch.EventProxy
             }
 
             // Call the COM component method
-            Console.WriteLine($"Executing jobItem step on methode [{jobItem.Method}]");
+            Console.WriteLine($"Executing jobItem step on method [{jobItem.Method}]");
             var comresp = CallComponentMethod(batchJob.ProgId, jobItem.Method, arguments);
 
             var isComSuccess = comresp != null;
