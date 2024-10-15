@@ -1,1 +1,176 @@
-TODO: Instructions for part 2: Deploy in AKS utilizing KEDA
+# Instructions for part 2: Deploy in AKS utilizing KEDA
+
+## Part 2 - Description
+
+
+
+All commands should be run from the root of the repo. 
+
+
+## Part 2 content
+- Understand k8s architecture
+    - k8s (k8s Api, master/system nodes, user nodes, pods)
+    - Namespaces, YAML, KEDA, Secrets
+    - Deployment, Job, ScaledJob
+ 
+- Tooling for AKS 
+- Connect to AKS cluster
+- Push docker image to Azure Container Registry
+- Create namespace in AKS
+- Create secret in AKS
+- Create TriggerAuthentication and ScaledJob
+
+
+## Understand k8s architecture
+
+[INSERT PICTURE]
+
+## Tooling for k8s
+
+- [Kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
+ Commandline tool for interacting with k8s.
+- [OpenLens](https://github.com/MuhammedKalkan/OpenLens/releases/tag/v6.2.5) Visual tool for working with k8s.
+
+- [Kubectx & Kubens](https://github.com/ahmetb/kubectx) Commandline tool for interacting with k8s. 
+
+## Connect to AKS cluster
+
+Use Azure CLI to connect to the AKS Cluster, this creates a .kube folder and a config file that is being used to connect to AKS. 
+
+```shell
+az login
+
+az account set --subscription [subscriptionId]
+
+az aks get-credentials --resource-group [resourcegroup name] --name [AKS cluster name] --overwrite-existing
+
+kubelogin convert-kubeconfig -l azurecli
+```
+
+Verify connection to AKS by list existing namespaces
+```shell
+kubectl get namespace
+```
+
+
+## Push docker image to Azure Container Registry
+
+Push the docker image to Azure Container Registry.
+
+```shell
+docker build -t "[Acr name].azurecr.io/[prefix]/eventproxy:1.0" .
+
+docker push "[Acr name].azurecr.io/[prefix]/eventproxy:1.0"
+```
+
+## Create namespace in AKS
+
+Create a file called deploy.yaml in the root of the repo. Insert YAML snippet in the file and save. 
+
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: [prefix]
+--- 
+```
+Apply the yaml and switch current namespace.   
+
+
+```shell
+kubectl apply -f deploy.yaml
+
+kubens [prefix]
+or 
+kubectl config set-context --current --namespace=[prefix]
+```
+Verify that the namespace was created connection to AKS by list existing namespaces.
+
+## Create secret in AKS
+
+Putting secrets into yaml is <mark>NOT GOOD PRACTISE</mark>, this is only a hack so to simplify it we are creating secrets using yaml. 
+A recommended approach would be to use [External Secrets](https://external-secrets.io/latest/provider/azure-key-vault/) together with Azure KeyVault. 
+
+Get the primary connection string for the Servicebus namespce either from the Azure portal or run the command.
+
+```shell
+az servicebus namespace authorization-rule keys list --g [resourcegroup name] --namespace-name [servicebus namespace name] --name RootManageSharedAccessKey --query primaryConnectionString -o tsv
+```
+
+Add the following yaml to the deploy.yaml file. 
+
+```shell
+apiVersion: v1
+kind: Secret
+metadata:
+  name: servicebus-secret
+type: Opaque
+stringData:
+  ConnectionString: [servicebus connectionstring]
+---
+```
+
+Apply the yaml and verify that the secret has been created.   
+
+```shell
+kubectl apply -f deploy.yaml
+kubectl get secrets
+kubectl describe secret servicebus-secret 
+```
+
+## Create TriggerAuthentication and ScaledJob
+
+The last step is to create the ScaledJob and the TriggerAuthentication that will be used for KEDA to authenticate against Servicebus. 
+
+```shell
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: azure-servicebus-auth
+spec:
+  secretTargetRef:
+  - parameter: connection
+    name: servicebus-secret
+    key: ConnectionString
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledJob
+metadata:
+  name: servicebus-scaledobject
+spec:
+  jobTargetRef:
+    template:
+      spec:
+        nodeSelector:
+          "kubernetes.io/os": windows
+        containers:
+        - name: eventproxyjob
+          image: [Acr name].azurecr.io/[prefix]/eventproxy:1.0
+          imagePullPolicy: Always
+          env: 
+          - name: ServiceBusConnectionString
+            valueFrom:
+              secretKeyRef:
+                name: servicebus-secret
+                key: ConnectionString
+          - name: QueueName
+            value: [prefix]-proxy
+        restartPolicy: Never
+  pollingInterval: 10
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  maxReplicaCount: 3
+  triggers:
+  - type: azure-servicebus
+    authenticationRef:
+      name: azure-servicebus-auth
+    metadata:
+      queueName: [prefix]-proxy
+      messageCount: "1"
+---
+```
+
+## Test the solution
+
+Use ServiceBusExplorer and add a message to the [prefix]-proxy queue. Monitor in OpenLens or use Kubectl to see how k8s creats a ScaledJob for each message and process it. View the reply queue for processed messages. 
+
