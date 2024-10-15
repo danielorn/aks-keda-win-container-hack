@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35027.167
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BillingBatchEventProxy", "BillingBatchProxy\BillingBatchEventProxy.csproj", "{11C85407-C79A-4EFB-B7AD-6E717505E260}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BatchSupport.Event", "BatchSupport\BatchSupport.Event.csproj", "{8A8E222D-9EA0-404C-88EA-4ACAADFDD41B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{11C85407-C79A-4EFB-B7AD-6E717505E260}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11C85407-C79A-4EFB-B7AD-6E717505E260}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11C85407-C79A-4EFB-B7AD-6E717505E260}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11C85407-C79A-4EFB-B7AD-6E717505E260}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A8E222D-9EA0-404C-88EA-4ACAADFDD41B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A8E222D-9EA0-404C-88EA-4ACAADFDD41B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A8E222D-9EA0-404C-88EA-4ACAADFDD41B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A8E222D-9EA0-404C-88EA-4ACAADFDD41B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {86974B3A-91E7-4269-8A9A-91B6A42AC15A}
+	EndGlobalSection
+EndGlobal
