@@ -1,4 +1,4 @@
-# Instructions for part 2: Deploy in AKS utilizing KEDA
+# Deploy ScaledJobs in AKS utilizing KEDA and process messages from Servicebus queues
 
 ## Part 2 - Description
 
@@ -31,7 +31,22 @@ All commands should be run from the root of the repo.
  Commandline tool for interacting with k8s.
 - [OpenLens](https://github.com/MuhammedKalkan/OpenLens/releases/tag/v6.2.5) Visual tool for working with k8s.
 
-- [Kubectx & Kubens](https://github.com/ahmetb/kubectx) Commandline tool for interacting with k8s. 
+- [Kubectx & Kubens](https://github.com/ahmetb/kubectx) Commandline tool for interacting with k8s.
+
+- Create a non-persistent alias in Powershell for kubectl 
+```shell
+Set-Alias -Name k -Value kubectl
+```
+
+- Create a non-persistent alias in shell for kubectl 
+```shell
+alias k='kubectl'
+```
+
+- Create a persistent alias in powershell/shell for kubectl, ask GitHub Copilot
+```shell
+how to create alias in [bash | powershell] for kubectl
+```
 
 ## Connect to AKS cluster
 
