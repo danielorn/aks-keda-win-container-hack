@@ -94,7 +94,7 @@ A recommended approach would be to use [External Secrets](https://external-secre
 Get the primary connection string for the Servicebus namespce either from the Azure portal or run the command.
 
 ```shell
-az servicebus namespace authorization-rule keys list --g [resourcegroup name] --namespace-name [servicebus namespace name] --name RootManageSharedAccessKey --query primaryConnectionString -o tsv
+az servicebus namespace authorization-rule keys list -g [resourcegroup name] --namespace-name [servicebus namespace name] --name RootManageSharedAccessKey --query primaryConnectionString -o tsv
 ```
 
 Add the following yaml to the deploy.yaml file. 
@@ -148,12 +148,12 @@ spec:
           image: [Acr name].azurecr.io/[prefix]/eventproxy:1.0
           imagePullPolicy: Always
           env: 
-          - name: ServiceBusConnectionString
+          - name: ConnectionStrings__ServiceBus
             valueFrom:
               secretKeyRef:
                 name: servicebus-secret
                 key: ConnectionString
-          - name: QueueName
+          - name: QueueSettings__QueueName
             value: [prefix]-proxy
         restartPolicy: Never
   pollingInterval: 10
@@ -174,3 +174,52 @@ spec:
 
 Use ServiceBusExplorer and add a message to the [prefix]-proxy queue. Monitor in OpenLens or use Kubectl to see how k8s creats a ScaledJob for each message and process it. View the reply queue for processed messages. 
 
+Run the following command to monitor the progress or look under Pods in OpenLens.  
+
+```shell
+kubectl get pods -w
+```
+
+Use ServiceBusExplorer to send this message, make sure to set the ReplyTo header to [prefix]-reply under the Sender tab.
+
+
+
+```json
+{
+  "JobId": "deb74855-196d-492b-a547-e941310e2a5d",
+  "ProgId": "HelloWorld",
+  "Origin": "BatchEmulator",
+  "Dt": "2024-10-11T12:53:22.135851+02:00",
+  "JobItems": [
+    {
+      "CallSequence": 1,
+      "Method": "Start",
+      "Parameters": [
+        {
+          "type": "String",
+          "value": "John"
+        }
+      ]
+    },
+    {
+      "CallSequence": 2,
+      "Method": "Start",
+      "Parameters": [
+        {
+          "type": "String",
+          "value": "Jane"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Run the following command to look at the logs or view them in OpenLens. 
+
+```shell
+kubectl get pods
+kubectl logs [podname]
+```
+
+Send five more messages and see how many pods are being shown in OpenLens. Also monitor the outcome of the windows where kubectl get pods -w is running. 
