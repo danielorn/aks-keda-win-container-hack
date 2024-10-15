@@ -1,0 +1,28 @@
+{
+  "JobId": "deb74855-196d-492b-a547-e941310e2a5d",
+  "ProgId": "HelloWorld",
+  "Origin": "BatchEmulator",
+  "Dt": "2024-10-11T12:53:22.135851+02:00",
+  "JobItems": [
+    {
+      "CallSequence": 1,
+      "Method": "Start",
+      "Parameters": [
+        {
+          "type": "String",
+          "value": "John"
+        }
+      ]
+    },
+    {
+      "CallSequence": 2,
+      "Method": "Start",
+      "Parameters": [
+        {
+          "type": "String",
+          "value": "Jane"
+        }
+      ]
+    }
+  ]
+}
