@@ -2,24 +2,24 @@
 
 ## Part 2 - Description
 
+- Understand kubernetes architecture, learn about Kubernetes components, namespaces, YAML, KEDA, secrets, deployments, jobs, and scaled jobs.
+
+- Install and use tools like Kubectl, OpenLens, and Kubectx & Kubens for managing Kubernetes.
+
+- Connect to AKS Cluster, use Azure CLI to log in, set the subscription, and get credentials for the AKS cluster. Verify the connection by listing existing namespaces.
+
+- Push Docker Image to Azure Container Registry, build and push your Docker image to the Azure Container Registry.
+
+- Create Namespace in AKS, create a deploy.yaml file with the namespace definition. Apply the YAML file and switch to the new namespace.
+
+- Create a Secret in AKS, obtain the Servicebus connection string and create a secret in the deploy.yaml file. Apply the YAML file and verify the secret creation.
+
+- Create TriggerAuthentication and ScaledJob, add TriggerAuthentication and ScaledJob definitions to the deploy.yaml file. Apply the YAML file to create the resources.
+
+- Test the Solution, add a message to the ServiceBus queue and monitor the job processing using OpenLens or Kubectl.
 
 
 All commands should be run from the root of the repo. 
-
-
-## Part 2 content
-- Understand k8s architecture
-    - k8s (k8s Api, master/system nodes, user nodes, pods)
-    - Namespaces, YAML, KEDA, Secrets
-    - Deployment, Job, ScaledJob
- 
-- Tooling for AKS 
-- Connect to AKS cluster
-- Push docker image to Azure Container Registry
-- Create namespace in AKS
-- Create secret in AKS
-- Create TriggerAuthentication and ScaledJob
-
 
 ## Understand k8s architecture
 
@@ -142,7 +142,7 @@ spec:
     template:
       spec:
         nodeSelector:
-          "kubernetes.io/os": windows
+          kubernetes.io/os: windows
         containers:
         - name: eventproxyjob
           image: [Acr name].azurecr.io/[prefix]/eventproxy:1.0
