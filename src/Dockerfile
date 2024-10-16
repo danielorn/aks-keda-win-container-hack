@@ -5,7 +5,7 @@
 ###############################################################################
 # This first build stage is based on top of the .NET Framework SDK Image
 # https://hub.docker.com/r/microsoft/dotnet-framework-sdk
-FROM mcr.microsoft.com/dotnet/framework/sdk:4.8.1 as build
+FROM mcr.microsoft.com/dotnet/framework/sdk:4.8 as build
 WORKDIR /app
 
 # Restore dependencies
@@ -29,14 +29,15 @@ RUN msbuild ./BillingBatchEventProxy/BillingBatchEventProxy.csproj /p:outDir=C:\
 # .exe and .exe.config files to a separate folder C:\app\program. This is to 
 # take advantage of the Docker layer caching mechanism in the runtime image.
 RUN mkdir C:\app\program
-RUN for /r "C:\app\bin" %x in (*.exe, *.exe.config) do move "%x" "C:\app\program"
+RUN Get-ChildItem -Path "C:\app\bin" -Include *.exe, *.exe.config |` 
+        ForEach-Object { Move-Item -Path $_.FullName -Destination "C:\app\program" }
 
 ###############################################################################
 # Create Runtime image
 ###############################################################################
 # This second (and final) build stage is based on top of the .NET Framework runtime image
 # https://hub.docker.com/r/microsoft/dotnet-framework-runtime
-FROM mcr.microsoft.com/dotnet/framework/runtime:4.8.1 as runtime
+FROM mcr.microsoft.com/dotnet/framework/runtime:4.8 as runtime
 
 # Install C++ Redist 2015-2019
 # The application depends on a complus component written in c++, thus the msvc
@@ -57,9 +58,6 @@ RUN START /WAIT cmd /c %WINDIR%\SysWOW64\regsvr32 /s complus/HelloWorldCom.dll
 # between two different image version will be less, leading to faster load times.
 COPY --from=build C:\app\bin .
 COPY --from=build C:\app\program .
-
-# Switch to container user (default is ContainerAdmin)
-USER ContainerUser
 
 # Define the command to run when the container starts
 CMD ["BillingBatchEventProxy.exe"]
