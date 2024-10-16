@@ -160,6 +160,7 @@ spec:
       spec:
         nodeSelector:
           kubernetes.io/os: windows
+          kubernetes.azure.com/os-sku: Windows2019
         containers:
         - name: eventproxyjob
           image: [Acr name].azurecr.io/[prefix]/eventproxy:1.0

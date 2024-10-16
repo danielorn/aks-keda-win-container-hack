@@ -5,7 +5,7 @@
 ###############################################################################
 # This first build stage is based on top of the .NET Framework SDK Image
 # https://hub.docker.com/r/microsoft/dotnet-framework-sdk
-FROM mcr.microsoft.com/dotnet/framework/sdk:4.8 as build
+FROM mcr.microsoft.com/dotnet/framework/sdk:4.8-windowsservercore-ltsc2019 as build
 WORKDIR /app
 
 # Restore dependencies
@@ -28,7 +28,7 @@ RUN msbuild ./BillingBatchEventProxy/BillingBatchEventProxy.csproj /p:outDir=C:\
 # downloaded dependencies as well as the main executables. The below moves the
 # .exe and .exe.config files to a separate folder C:\app\program. This is to 
 # take advantage of the Docker layer caching mechanism in the runtime image.
-RUN mkdir C:\app\program
+RUN New-Item -Path "c:\app" -Name "program" -ItemType Directory
 RUN Get-ChildItem -Path "C:\app\bin" -Include *.exe, *.exe.config |` 
         ForEach-Object { Move-Item -Path $_.FullName -Destination "C:\app\program" }
 
@@ -37,7 +37,7 @@ RUN Get-ChildItem -Path "C:\app\bin" -Include *.exe, *.exe.config |`
 ###############################################################################
 # This second (and final) build stage is based on top of the .NET Framework runtime image
 # https://hub.docker.com/r/microsoft/dotnet-framework-runtime
-FROM mcr.microsoft.com/dotnet/framework/runtime:4.8 as runtime
+FROM mcr.microsoft.com/dotnet/framework/runtime:4.8-windowsservercore-ltsc2019 as runtime
 
 # Install C++ Redist 2015-2019
 # The application depends on a complus component written in c++, thus the msvc
