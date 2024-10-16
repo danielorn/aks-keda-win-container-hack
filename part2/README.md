@@ -19,7 +19,7 @@
 - Test the Solution, add a message to the ServiceBus queue and monitor the job processing using OpenLens or Kubectl.
 
 
-All commands should be run from the root of the repo. 
+All commands should be run from the root of the repo if not stated else.  
 
 ## Understand k8s architecture
 
@@ -70,10 +70,12 @@ kubectl get namespace
 
 ## Push docker image to Azure Container Registry
 
-Push the docker image to Azure Container Registry.
+Login to Azure Container Registry and push the docker image. 
 
 ```shell
-docker build -t "[Acr name].azurecr.io/[prefix]/eventproxy:1.0" .
+az acr login -n [Acr name]
+
+docker build -t "[Acr name].azurecr.io/[prefix]/eventproxy:1.0" src/.
 
 docker push "[Acr name].azurecr.io/[prefix]/eventproxy:1.0"
 ```
