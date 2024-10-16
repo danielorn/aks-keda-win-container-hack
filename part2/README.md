@@ -153,7 +153,7 @@ spec:
 apiVersion: keda.sh/v1alpha1
 kind: ScaledJob
 metadata:
-  name: servicebus-scaledobject
+  name: eventproxyjob-scaledobject
 spec:
   jobTargetRef:
     template:

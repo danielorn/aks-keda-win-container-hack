@@ -176,7 +176,3 @@ Use ServiceBusExplorer and add a message to the `[prefix]-proxy` queue using eit
 Monitor the log output and check the `[prefix]-reply` queue for processed messages.
 
 <mark>PLEASE NOTE: The application will process one message from the queue and then exit. If you want to process multiple messages you need to launch one container per message.</mark>
-
-## Debug the containerized application
-
-// TODO

@@ -134,7 +134,7 @@ Grant access to yourself to add secrets in Azure keyvault by adding you as a "Ke
 ```shell
 az ad signed-in-user show --query id --output tsv
 # Get the id from the query above
-az role assignment create --role "Key Vault Secrets Officer" --assignee [id] --scope /subscriptions/[subscriptionId]/resourceGroups/rg-[prefix]/providers/Microsoft.KeyVault/vaults/[KeyVaultName]
+az role assignment create --role "Key Vault Secrets Officer" --assignee [id] --scope /subscriptions/[subscriptionId]/resourceGroups/[resourcegroup]/providers/Microsoft.KeyVault/vaults/[KeyVaultName]
 ```
 Create secret in Azure Keyvault
 ```shell
