@@ -150,7 +150,7 @@ az identity create --name umi-[prefix] --resource-group rg-[prefix] --location s
 az identity show --name umi-[prefix] --resource-group rg-[prefix] --query clientId --output tsv
 
 # Get the clienId from the query above
-az role assignment create --role "Key Vault Secrets User" --assignee [clientId] --scope /subscriptions/[subscriptionId]/resourceGroups/rg-[prefix]/providers/Microsoft.KeyVault/vaults/[KeyVaultName]
+az role assignment create --role "Key Vault Secrets User" --assignee [clientId] --scope /subscriptions/[subscriptionId]/resourceGroups/[resourcegroup]/providers/Microsoft.KeyVault/vaults/[KeyVaultName]
 ```
 
 Create a federated credential that is used by k8s service account to access the keyvault. Use the portal ( User Managed Identity --> Federated credentials --> Add Credential --> Kubernetes Accessing Azure Resources) or use the CLI. 
