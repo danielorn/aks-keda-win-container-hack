@@ -28,7 +28,7 @@ namespace Billing.Batch.EventProxy
             var program = new BatchComponentEventProxy();
             await program.RunAsync();
             
-            Console.WriteLine($"Shutdown.");
+            Console.WriteLine($"INFO: Shutdown.");
             Environment.Exit(0);
         }
 
@@ -47,7 +47,7 @@ namespace Billing.Batch.EventProxy
             MinDelay = configuration.GetSection("ProcessSettings").GetValue<int>("MinDelay", 3000);
             MaxDelay = configuration.GetSection("ProcessSettings").GetValue<int>("MaxDelay", 3000);
 
-            Console.WriteLine($"Starting BillingBatchEventProxy listen on queue [{QueueName}]");
+            Console.WriteLine($"INFO: Starting BillingBatchEventProxy listen on queue [{QueueName}]");
 
             JobProcessor = new BillingBatchJobProcessor();
 
@@ -77,7 +77,7 @@ namespace Billing.Batch.EventProxy
             await Tcs.Task;
 
             // Stop processing and clean up resources
-            Console.WriteLine($"Cleaning up");
+            Console.WriteLine($"INFO: Cleaning up");
             await processor.StopProcessingAsync();
             await processor.CloseAsync();
             await Client.DisposeAsync();
@@ -101,7 +101,7 @@ namespace Billing.Batch.EventProxy
             if (string.IsNullOrEmpty(args.Message.ReplyTo))
             {
                 // nowhere to send the response
-                Console.WriteLine($"Critical!, No replyTo address in message: {body}");
+                Console.WriteLine($"ERROR: No replyTo header specified");
                 Tcs.SetResult(true);
                 return;
             }
@@ -116,7 +116,7 @@ namespace Billing.Batch.EventProxy
                     await foreach (var response in BillingBatchJobProcessor.ProcessJob(batchJob, args.Message.CorrelationId))
                     {
                         // Handle each RespondMessage
-                        Console.WriteLine($"Processed response: {response.Output}");
+                        Console.WriteLine($"DEBUG: Processed response: {response.Output}");
 
                         // send the response message using the SendMessage method
                         await SendMessage(args.Message.ReplyTo, args.Message.CorrelationId, response);
@@ -140,20 +140,17 @@ namespace Billing.Batch.EventProxy
                     };
                     await SendMessage(args.Message.ReplyTo, args.Message.CorrelationId, respondMessage);
 
-                    Console.WriteLine($"Error processing job: {ex.Message}");
+                    Console.WriteLine($"ERROR: processing job: {ex.Message}");
                     // Send the response back to the replyTo queue
 
                 }
             }
             else 
             {
-                var message = $"Failed to deserialize msgBody: {body}";
-                Console.WriteLine(message);
-
                 var respondMessage = new RespondMessage
                 {
-                    Jobid = batchJob.JobId,
-                    Origin = batchJob.ProgId,
+                    Jobid = "UNKNOWN",
+                    Origin = "EventProxy",
                     Success = false,
                     Dt = DateTime.UtcNow,
                     Output = BatchResults.XStatePanic,
@@ -185,6 +182,7 @@ namespace Billing.Batch.EventProxy
             };
 
             // Send the response message
+            Console.WriteLine($"INFO: sending response message to queue '{replyTo}'");
             await sender.SendMessageAsync(responseMessage);
             await sender.CloseAsync();
         }
@@ -192,7 +190,7 @@ namespace Billing.Batch.EventProxy
 
         private async Task ErrorHandler(ProcessErrorEventArgs args)
         {
-            Console.WriteLine($"Error: {args.Exception}");
+            Console.WriteLine($"ERROR: {args.Exception}");
             // Error handling needs to be implemented here, for example sending 
             // a message to a dead-letter queue or responding to the replyTo Queue with an error message
 
@@ -211,8 +209,14 @@ namespace Billing.Batch.EventProxy
             };
 
             // Deserialize the JSON string into msgBody
-            Console.WriteLine($"Attempting to deserialize msgBody to an batchJob: {body}");
-            var batchJob = JsonSerializer.Deserialize<JobMessage>(body, options);
+            Console.WriteLine($"DEBUG: Attempting to deserialize msgBody to an batchJob: {body}");
+
+            JobMessage batchJob = null;
+            try {
+                batchJob = JsonSerializer.Deserialize<JobMessage>(body, options); 
+            } catch (Exception ex) {
+                Console.WriteLine($"ERROR: Exception when deserializing message body: {ex.Message}");
+            }
 
             // If deserialization was successful, return the batchJob
             if (batchJob != null)
@@ -221,7 +225,7 @@ namespace Billing.Batch.EventProxy
             }
             else
             {
-                Console.WriteLine($"Failed to deserialize msgBody: {body}");
+                Console.WriteLine($"ERROR: Failed to deserialize msgBody: {body}");
                 // Error handling needs to be implemented here, for example sending 
                 // a message to a dead-letter queue or responding to the replyTo Queue with an error message
             }

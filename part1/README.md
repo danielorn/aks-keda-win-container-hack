@@ -2,7 +2,11 @@
 
 ## Part 1 - Description
 
-TODO: GENERATE OVERVIEW OF PART 1 CONTENT
+- Understand docker architecture, learn about docker images, layers and containers.
+- Understand what a Dockerfile is and the most common instructions like `FROM`, `COPY`, `ADD`, `RUN`, `WORKDIR`, `USER`, `CMD`
+- Create a multistage Dockerfile to build and package an existing .NET application that utilizes COM+ components written in C++
+- Use docker desktop to build and run containers locally.
+- Create queues in Azure Servicebus and connect to them from the container
 
 ## Tooling used in part 1
 
@@ -98,7 +102,9 @@ Build Stage:
 
 ### Building the container image
 
-To create an image the `docker build` command is used. 
+To create an image the `docker build` command is used.
+
+<mark>PLEASE NOTE: Before running the command, make sure that docker desktop is started and is running in windows container mode</mark>
 
 By executing the below command in the same folder as the `Dockerfile` a new image called `eventproxy:1.0` is created.
 

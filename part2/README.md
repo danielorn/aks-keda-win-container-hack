@@ -239,4 +239,9 @@ kubectl get pods
 kubectl logs [podname]
 ```
 
-Send five more messages and see how many pods are being shown in OpenLens. Also monitor the outcome of the windows where kubectl get pods -w is running. 
+Send five more messages and see how many pods are being shown in OpenLens. Also monitor the outcome of the windows where kubectl get pods -w is running.
+
+## Test the solution with a badly formatted message
+
+- Send a message where the replyTo queue is not specified and examine the logs
+- Send a message where the body is not valid json and examine the logs.

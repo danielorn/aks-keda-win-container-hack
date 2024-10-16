@@ -62,7 +62,7 @@ namespace Billing.Batch.EventProxy
             }
 
             // Call the COM component method
-            Console.WriteLine($"Executing jobItem step on method [{jobItem.Method}]");
+            Console.WriteLine($"INFO: Executing jobItem step on method [{jobItem.Method}]");
             var comresp = CallComponentMethod(batchJob.ProgId, jobItem.Method, arguments);
 
             var isComSuccess = comresp != null;
@@ -95,7 +95,7 @@ namespace Billing.Batch.EventProxy
 
             if (resp == null)
             {
-                Console.WriteLine("Method call failed.");
+                Console.WriteLine("ERROR: Method call failed.");
                 return null;
             }
 

@@ -42,7 +42,7 @@ namespace Billing.BatchSupport.BatchJob.Event
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error executing COM method: {ex.Message}");
+                Console.WriteLine($"ERROR: executing COM method: {ex.Message}");
                 return null;
             }
         }

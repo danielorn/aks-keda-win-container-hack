@@ -1,6 +1,113 @@
 TODO: Instructions for part 3, additional features
 
-## Container Insights
+# Container Insights
+
+## Part 3 - Description
+
+- Learn about container insights and how to access it
+- Learn about kusto query language
+- Query logs from all containepodsrs in a namespace
+- Group logs by pod
+- Count the number of logged errors for each pod
+- Filter the result to show only pods that logged errors
+
+## What is container insights
+
+[Container Insights](https://learn.microsoft.com/en-us/azure/azure-monitor/containers/container-insights-overview) is a feature of Azure Monitor that provides comprehensive monitoring of containerized applications. It collects performance metrics, inventory data, health state information and application level logs from container hosts and containers, which is then available for analysis in Azure Monitor Logs.
+
+## Query logs from your containers
+KQL, or Kusto Query Language, is a powerful language used to query and analyze large datasets in for example Azure Monitor Logs. It’s designed to be easy to read and write, with a syntax similar to SQL.
+
+All output to STDOUT and STDERR from containers in the AKS cluster is sent to a log analytics workspace from where they can be queried using KQL.
+
+To query logs for containers, navigate to the AKS instance in the Azure portal and click "Monitoring ->Logs" in the left hand side menu
+
+### List all logs from containers in your namespace
+
+this query returns all records from the ContainerLogV2 table where the PodNamespace is equal to [prefix]. To make this query functional, you would replace [prefix] with the actual namespace value you’re looking for.
+
+```kql
+ContainerLogV2
+| where PodNamespace == '[prefix]'
+```
+
+#### Detailed query breakdown
+
+- **ContainerLogV2**
+
+  This is the name of the table being queried. It  contains log data for containers, with various columns including PodNamespace, TimeGenerated, and LogMessage.
+
+- **| where PodNamespace == ‘[prefix]’**
+
+  Filters the rows to include only those where the PodNamespace column matches the specified [prefix].
+
+### Group the log entries by container
+
+- Use the kusto operator [summarize](https://learn.microsoft.com/en-us/kusto/query/summarize-operator?view=microsoft-fabric) to aggregate the content of the table based on `PodName`
+
+```kql
+ContainerLogV2
+| where PodNamespace == '[prefix]'
+| extend LogMsg = pack('TimeGenerated', TimeGenerated, 'LogLevel', LogLevel, 'LogMessage', LogMessage)
+| summarize dateTime= min(TimeGenerated), 
+    Logs = make_list(LogMsg, 1000) by PodName 
+```
+
+#### Detailed query breakdown
+
+- **| extend LogMsg = pack(‘TimeGenerated’, TimeGenerated, 'LogLevel', LogLevel, ‘LogMessage’, LogMessage)**
+   Creates a new column LogMsg which is a dynamic object containing the TimeGenerated LogLevel and LogMessage fields.
+
+- **| summarize dateTime= min(TimeGenerated), Logs = make_list(LogMsg, 1000) by PodName**
+
+  Groups the data by PodName.
+  - For each group, calculates dateTime as the minimum value of TimeGenerated, representing the earliest log entry for each pod.
+  - Creates Logs as a list of up to 1000 LogMsg objects for each pod.
+
+### Count the number of errors for each container
+
+```kql
+ContainerLogV2
+| where PodNamespace == '[prefix]'
+| extend LogMsg = pack('TimeGenerated', TimeGenerated, 'LogLevel', LogLevel, 'LogMessage', LogMessage)
+| extend ErrorCount = case(indexof(tostring(LogMessage), "ERROR:") != -1, 1, 0)
+| summarize dateTime= min(TimeGenerated), 
+    TotalErrors = sum(ErrorCount), 
+    Logs = make_list(LogMsg, 1000) by PodName
+```
+
+#### Detailed query breakdown
+- **| extend ErrorCount = case(indexof(tostring(LogMessage), “ERROR:”) != -1, 1, 0)**
+  
+  Creates a new column ErrorCount which is set to 1 if the LogMessage contains the substring “ERROR:”, and 0 otherwise.
+
+- **| summarize dateTime= min(TimeGenerated), Logs = make_list(LogMsg, 1000), TotalErrors = sum(ErrorCount) by PodName**
+
+  Groups the data by PodName.
+  - For each group, calculates dateTime as the minimum value of TimeGenerated, representing the earliest log entry for each pod.
+  - Creates Logs as a list of up to 1000 LogMsg objects for each pod.
+  - Calculates TotalErrors as the sum of ErrorCount for each pod.
+
+### Filter the result to display only containers that have errors
+```kql
+ContainerLogV2
+| where PodNamespace == '[prefix]'
+| extend LogMsg = pack('TimeGenerated', TimeGenerated, 'LogMessage', LogMessage)
+| extend ErrorCount = case(indexof(tostring(LogMessage), "ERROR:") != -1, 1, 0)
+| summarize dateTime= min(TimeGenerated), 
+    Logs = make_list(LogMsg, 1000), 
+    TotalErrors = sum(ErrorCount) by PodName
+| where TotalErrors > 0
+```
+
+#### Detailed query breakdown
+- **| where TotalErrors >0**
+  
+  Filter result to show only rows where TotalErrors are larger than 0 (i.e only pods that logged errors)
+
+### More log examples
+
+Please see: https://learn.microsoft.com/en-us/azure/azure-monitor/containers/container-insights-log-query#container-logs
 
 # Secret Management
 
@@ -20,7 +127,7 @@ TODO: Instructions for part 3, additional features
 
 
 ## Grant access to Azure keyvault 
-Use existing Azure keyvault provided by hackathon. 
+Use existing Azure keyvault provided by hackathon.
 
 Grant access to yourself to add secrets in Azure keyvault by adding you as a "Key Vault Secrets Officer" role. 
 
