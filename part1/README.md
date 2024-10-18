@@ -168,7 +168,9 @@ Once the application has started you should see the following logs outputted
 Starting BillingBatchEventProxy listen on queue [[prefix]-proxy]
 ```
 
-Use ServiceBusExplorer and add a message to the `[prefix]-proxy` queue using either the [portal](https://learn.microsoft.com/en-us/azure/service-bus-messaging/explorer#send-a-message-to-a-queue-or-topic) or the [open source client](https://github.com/paolosalvatori/ServiceBusExplorer)
+Use ServiceBusExplorer and add a message to the `[prefix]-proxy` queue using either the [portal](https://learn.microsoft.com/en-us/azure/service-bus-messaging/explorer#send-a-message-to-a-queue-or-topic) or the [open source client](https://github.com/paolosalvatori/ServiceBusExplorer).
+
+To use the ServiceBusExplorer client you need to add the connection string retrieved from the step above. Copy the connection string and open ServiceBusExplorer. Go to File -> Connect using SAS. In the windows that appears you will see a title "Service Bus Namespace", click the drop down menu and select "Enter connection string..." and paste the connection string. 
 
 - An example message body can be found in [example-message.json](../example-message.json)
 - Set the `replyTo` header to `[prefix]-reply`
