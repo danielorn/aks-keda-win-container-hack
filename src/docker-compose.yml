@@ -1,0 +1,13 @@
+services:
+  billingbatcheventproxy:
+    image: ${DOCKER_REGISTRY-}eventproxy
+    labels:
+      # Set this so that the debugger knows which container to attach to
+      # https://github.com/microsoft/DockerTools/issues/355#issuecomment-1355506604
+      com.microsoft.visual-studio.project-name: "BillingBatchEventProxy"
+    env_file:
+      # Pass the configuration defined in this file to the container as environment variables
+      - config.env
+    build:
+      context: .
+      dockerfile: Dockerfile

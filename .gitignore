@@ -398,3 +398,5 @@ FodyWeavers.xsd
 *.sln.iml
 jnd.yaml
 values.yaml
+src/docker-compose.override.yml
+src/*.env

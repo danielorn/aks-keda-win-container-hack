@@ -176,3 +176,59 @@ Use ServiceBusExplorer and add a message to the `[prefix]-proxy` queue using eit
 Monitor the log output and check the `[prefix]-reply` queue for processed messages.
 
 <mark>PLEASE NOTE: The application will process one message from the queue and then exit. If you want to process multiple messages you need to launch one container per message.</mark>
+
+## Simplify orchestration with docker compose
+
+Docker Compose is a tool that allows you to define and manage multi-container Docker applications. It uses a YAML file to configure the services including how to build them and what environment variables to pass in at startup.
+
+The [docker compose](../src/docker-compose.yml) file defines a service that will be built from a Dockerfile in the current directory, with environment variables loaded from config.env, and a label set for Visual Studio debugging. The image name can be optionally prefixed with a registry specified by the DOCKER_REGISTRY environment variable. Here’s a detailed explanation of the configuration:
+
+**Service Definition:**
+- `billingbatcheventproxy:` This is the name of the service. It represents a container that will be run.
+
+**Image:**
+- `image: ${DOCKERR​EGISTRY−eventproxy}`: The image to use for the container. The `${DOCKER_REGISTRY-}` syntax allows for an optional registry prefix to be specified via an environment variable. IfDOCKER_REGISTRY` is not set, it defaults to an empty string.
+
+**Labels:**
+- `com.microsoft.visual-studio.project-name: "BillingBatchEventProxy":` This label is used by Visual Studio to identify the project associated with the container. It’s helpful for debugging purposes.
+
+**Environment Variables:**
+
+`env_file: - config.env`: The env_file option specifies a file from which to read environment variables. The variables defined in config.env will be passed to the container.
+
+**Build Configuration:**
+
+- `build`: This section defines the build context and Dockerfile to use for building the image.
+  - `context: .`: The build context is set to the current directory.
+  - `dockerfile: Dockerfile`: The Dockerfile in the build context directory will be used for building the image.
+
+### Create a config.env
+
+The config.en file is used to pass environment variables into the container. Place a file under the [src/](../src/) folder named `config.env` with the following content
+
+```shell
+ConnectionStrings__ServiceBus="[ConnectionString]"
+QueueSettings__QueueName=[prefix]-proxy
+```
+
+### Build the container image using docker compose
+
+```shell
+docker compose build
+```
+
+### Run the container using docker compose
+
+```shell
+docker compose up
+```
+
+
+## Debug in Visual Studio
+
+The containerized application can be debugged from within Visual Studio, please follow the instructions below and set a few breakpoints and step through the code:
+
+- Open the solution in Visual Studio `Billing.Batch.EventProxy.PoC.sln`
+- Set the solution configuration to `Debug`
+- Select `docker-compose` as the startup item
+- Start Debugging `Debug ->Start debugging` or hit `F5`

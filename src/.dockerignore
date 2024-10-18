@@ -1,0 +1,13 @@
+.git
+**/.gitginore
+**/*.sln
+
+
+**/bin/
+**/obj/
+**/.vs/
+**/.gitginore
+config.env
+launchSettings.json
+docker-compose.dcproj
+docker-compose.yml
