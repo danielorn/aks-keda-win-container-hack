@@ -138,6 +138,7 @@ kubectl describe secret servicebus-secret
 ## Create TriggerAuthentication and ScaledJob
 
 The last step is to create the ScaledJob and the TriggerAuthentication that will be used for KEDA to authenticate against Servicebus. 
+Add the following to the existing deploy.yaml:
 
 ```shell
 apiVersion: keda.sh/v1alpha1
