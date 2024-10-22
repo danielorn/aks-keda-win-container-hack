@@ -140,6 +140,7 @@ Azure servicebus queues can be created either using the [Azure portal](https://l
 
 ```shell
 az login
+az account set --subscription [subscription id]
 az servicebus queue create --resource-group [resourcegroup name] --namespace-name [servicebus namespace name] --name [prefix]-proxy
 az servicebus queue create --resource-group [resourcegroup name] --namespace-name [servicebus namespace name] --name [prefix]-reply
 ```
