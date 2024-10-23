@@ -326,6 +326,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: hello-kubernetes-svc
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
 spec:
   type: ClusterIP
   ports:
