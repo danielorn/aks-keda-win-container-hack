@@ -284,3 +284,142 @@ kubectl get pods
 kubectl logs [podname]
 ```
 
+# Deploy a web app 
+
+
+## Create a pod and expose a service
+
+Create a pod and expose it using a service with type ClusterIP. 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-kubernetes-pod
+  labels:
+    app: hello-kubernetes
+spec:
+  containers:
+  - name: hello-kubernetes
+    image: paulbouwer/hello-kubernetes:1.10
+    env:
+      - name: MESSAGE 
+        value: "This is only a pod!"
+      - name: KUBERNETES_NAMESPACE
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.namespace
+      - name: KUBERNETES_POD_NAME
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.name
+      - name: KUBERNETES_NODE_NAME
+        valueFrom:
+          fieldRef:
+            fieldPath: spec.nodeName
+    ports:
+    - containerPort: 8080
+  nodeSelector:
+    kubernetes.io/os: linux
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-kubernetes-svc
+spec:
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  selector:
+    app: hello-kubernetes
+```
+
+Check the service IP address using OpenLens or kubectl. 
+```shell
+kubectl apply -f deploy.yaml
+kubectl get svc
+kubectl describe svc hello-kubernetes-svc 
+```
+Try to navigate to the IP from a browser. 
+
+Change the service type to LoadBalancer instead of ClusterIP, save the yaml file and deploy. 
+
+Check the service IP address using OpenLens or kubectl.
+
+```shell
+kubectl apply -f deploy.yaml
+kubectl describe svc hello-kubernetes-svc 
+```
+
+Try to navigate to the IP from a browser. 
+
+Delete the pod 
+```shell
+kubectl delete pod hello-kubernetes-pod
+```
+## Create a deployment
+
+Create a deployment, deploy it.  
+
+```yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-kubernetes-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-kubernetes
+  template:
+    metadata:
+      labels:
+        app: hello-kubernetes
+    spec:
+      nodeSelector:
+          kubernetes.io/os: linux
+      containers:
+      - name: hello-kubernetes
+        image: paulbouwer/hello-kubernetes:1.10
+        env:
+        - name: MESSAGE 
+          value: "Nice message :-) "
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: KUBERNETES_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: KUBERNETES_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        ports:
+        - containerPort: 8080
+```
+
+```shell
+kubectl apply -f deploy.yaml
+kubectl get pods -o wide
+```
+
+Check the number of ready pods and which node it is running on. 
+
+Deploy the pod using OpenLens or kubectl, what happens?
+Check the nodename. 
+
+## Scale the app to multiple replicas
+
+Change value replicas to 2 instead of 1, deploy it. 
+
+```shell
+kubectl apply -f deploy.yaml
+kubectl get pods -o wide
+```
+Browse to the IP address multiple times. 
+Check the nodenames, check the logs, traffic is being distributed between the pods. 
+
