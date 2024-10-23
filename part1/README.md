@@ -73,7 +73,7 @@ The application code itself will not be modified as part of the containerization
 
 ### Create the dockerfile
 
-A [Dockerfile](src/Dockerfile) for building the application and creating the final image can be found in the [src/](src/) directory
+A [Dockerfile](../src/Dockerfile) for building the application and creating the final image can be found in the [src/](../src/) directory
 
 This Dockerfile sets up a multistage build where the application is built in the first stage and the runtime environment is prepared in the second stage. Take some time to familiarize yourself with the Dockerfile content. Below is a detailed summary of the provided Dockerfile
 
