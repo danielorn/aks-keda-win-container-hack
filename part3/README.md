@@ -222,6 +222,7 @@ kind: ExternalSecret
 metadata:
   name: [prefix]-external-secret
 spec:
+  refreshInterval: 1m
   secretStoreRef:
     name: azure-store
     kind: SecretStore
@@ -229,9 +230,9 @@ spec:
     name: [prefix]-secret #secret name in k8s 
     creationPolicy: Owner
   data:
-  - secretKey: [prefix]-secret #secret name in akv
+  - secretKey: [prefix]-secret # secret key name in k8s
     remoteRef:
-      key: [prefix]-secret 
+      key: [prefix]-secret #secret name in akv
 ---
 ```
 
@@ -282,6 +283,40 @@ Check the logs using commandline or OpenLens.
 ```shell
 kubectl get pods
 kubectl logs [podname]
+```
+
+Use External secrets for part 2. 
+Delete existing secret called "servicebus-secret" in your namespace. 
+Create a secret in Azure keyvault 
+
+```shell
+az keyvault secret set --vault-name [KeyVaultName] --name [prefix]-secret-sb --value [your servicebus connectionstring]
+```
+
+Create an External Secret and verify that it's being synced. 
+
+```yaml
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: [prefix]-external-secret-servicebus
+spec:
+  refreshInterval: 1m
+  secretStoreRef:
+    name: azure-store
+    kind: SecretStore
+  target:
+    name: servicebus-secret #secret name in k8s 
+    creationPolicy: Owner
+  data:
+  - secretKey: ConnectionString # secret key name in k8s
+    remoteRef:
+      key: [prefix]-secret-sb #secret name in akv
+---
+```
+
+```shell
+kubectl apply -f deploy.yaml
 ```
 
 # Deploy a web app 
